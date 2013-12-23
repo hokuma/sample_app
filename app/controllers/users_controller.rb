@@ -1,7 +1,9 @@
 class UsersController < ApplicationController
 
+  before_filter :unsigned_in_user, only: [:new, :create]
   before_filter :signed_in_user, only: [:index, :edit, :update, :destroy]
   before_filter :correct_user, only: [:edit, :update]
+  before_filter :another_user, only: :destroy
   before_filter :admin_user,   only: :destroy
 
   def index 
@@ -54,9 +56,18 @@ class UsersController < ApplicationController
     end
   end
 
+  def unsigned_in_user
+    redirect_to root_url if signed_in?
+  end
+
   def correct_user
     @user = User.find(params[:id])
     redirect_to(root_path) unless current_user?(@user)
+  end
+
+  def another_user
+    @user ||= User.find(params[:id])
+    redirect_to(root_path) if current_user?(@user)
   end
 
   def admin_user
